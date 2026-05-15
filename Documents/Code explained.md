@@ -96,8 +96,30 @@ The results shown in the code are:
 
 ## 3.0 Advanced QAOA
 ### Constructing Ising Hamiltonian
-Decision variables as x<sub>00</sub> -> x<sub>0</sub>, x<sub>01</sub> -> x<sub>1</sub>, we will get 
+Decision variables are originally defined as
+
+$$
+x_{it} =
+\begin{cases}
+1 & \text{if the salesman visits node } i \text{ at time } t \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+However, we need the decision variables to correspond to qubits indexed by a single label. So we have reduce the dimension of decision variables from 2D into 1D. This can be achieved with the following substitution:
 
 $$
 x_{ij} \rightarrow x_{in+t} \rightarrow x_k, k \in \left\\{0,...,n^2-1\right\\}
+$$
+
+Now the decision variables are in 1D and it corresponds to the Pauli Z matrices. Let there be 3 nodes (n = 3), if we look at decision variable of salesman being at node 2 and time 1, it corresponds to the following qubit representation (where I is the identity matrix):
+
+$$
+x_{21} \rightarrow x_7 \rightarrow Z_7 \rightarrow I_8Z_7I_6I_5I_4I_3I_2I_1I_0
+$$
+
+The one above shows an example of linear terms in the Ising Hamiltonian. As for quadratic terms, it is as follow:
+
+$$
+x_{00}x_{21} \rightarrow x_0x_7 \rightarrow Z_0Z_7 \rightarrow I_8Z_7I_6I_5I_4I_3I_2I_1Z_0
 $$
