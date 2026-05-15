@@ -1,0 +1,124 @@
+# The Travelling Salesman
+## Mathematical formulation
+**Goal:** Find the **shortest tour** that **visits every city exactly once** and **returns to the starting city.**
+
+First, let us decide on the decision variable. Based on the goal, we need to know <b>which node i</b> is visited at <b>time t</b>. This gives decision variable as:<br>
+
+$$
+x_{it} =
+\begin{cases}
+1 & \text{if the salesman visits node } i \text{ at time } t \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+An example of x<sub>00</sub> and x<sub>31</sub> means the salesman first visits node 0 at time 0, then node 3 at time 1
+
+And since there are **n cities**, there will be **n time slots for each city**, making the number of decision variables be:
+
+$$
+n^2
+$$
+
+The **objective** is to **minimize** the **distance**, this gives the objective function as the sum of all travelled arcs multiplied by the cost of the arc,
+
+$$
+\min H = \sum_t^{n-1}\sum_i^{n-1}\sum_j^{n-1} d_{ij}x_{it}x_{jt+1}
+$$
+
+while subjected to two constraints:
+<ul>
+  <li>Each city must appear exactly once</li>
+</ul>
+
+$$
+\sum_{t}^{n-1}x_{it} = 1, \forall i
+$$
+
+<ul>
+  <li>Each tour position must contain exactly one city</li>
+</ul>
+
+$$
+\sum_{i}^{n-1}x_{it} = 1, \forall t
+$$
+
+## QUBO formulation
+First, we convert **constraint 1 into QUBO**, which is the formula below, where A is the **penalty coefficient**.
+
+$$
+A \sum_i(1 - \sum_t x_{it})^2
+$$
+
+Similarly, **constraint 2** becomes
+
+$$
+A\sum_t(1 - \sum_i x_{it})^2
+$$
+
+This gives the resulting **QUBO formulation**:
+
+$$
+\min H = \sum_t^{n-1}\sum_i^{n-1}\sum_j^{n-1} d_{ij}x_{it}x_{jt+1} + A\sum_i \left( 1 - \sum_t x_{it} \right) ^2 + A\sum_t \left( 1 - \sum_i x_{it} \right) ^2
+$$
+
+## Ising Hamiltonian
+QUBO can be converted to Ising Hamiltonian with the following formula:
+
+$$
+x_i = \frac{1-s_i}{2}, \text{where } x \in \\{0, 1\\} \text{ and } z \in \\{-1, 1\\}
+$$
+
+As we are essentially converting binary variable x into spin variable z. By substituting this formula, the **objective function** becomes:
+
+$$
+H = \sum_t\sum_i\sum_j d_{ij}x_{it}x_{jt+1} 
+$$
+$$
+= \sum_t\sum_i\sum_j d_{ij}\frac{1-s_{it}}{2}\frac{1-s_{jt+1}}{2}
+$$
+$$
+= \frac{1}{4}\sum_t\sum_i\sum_j d_{ij}(1-s_{it}-s_{jt+1}+s_{it}s_{jt+1})
+$$
+$$
+= \frac{1}{4}\sum_{i,j,t}d_{ij} - \frac{1}{4}\sum_{i,j,t} d_{ij}s_{it} - \frac{1}{4}\sum_{i,j,t} d_{ij}s_{jt+1} + \frac{1}{4}\sum_{i,j,t}d_{ij}s_{it}s_{jt+1}
+$$
+$$
+= - \frac{1}{2}\sum_{i,j,t} d_{ij}s_{it} + \frac{1}{4}\sum_{i,j,t}d_{ij}s_{it}s_{jt+1}
+$$
+
+Note that the constant term is dropped as we do not care about that in the Ising Hamiltonian.<br>Following that, **constraint 1** becomes:
+
+$$
+A\sum_i \left( 1 - \sum_t x_{it} \right) ^2
+$$
+$$
+= A\sum_i \left( 1 - \sum_t \frac{1-s_{it}}{2} \right) ^2
+$$
+$$
+= A\sum_i \left( \frac{2-n}{2} + \frac{1}{2}\sum_t s_{it} \right)^2
+$$
+$$
+= A\sum_i \left( \left( \frac{2-n}{2} \right) ^2 + \frac{2-n}{2} \sum_t s_{it} + \frac{1}{4} \left( \sum_t s_{it} \right)^2 \right)
+$$
+$$
+= A\sum_i \left( \left( \frac{2-n}{2} \right)^2 + \frac{2-n}{2} \sum_t s_{it} + \sum_t s_{it}^2 + \frac{1}{2} \sum_{t \lt t'} s_{it} s_{it'} \right)
+$$
+$$
+= A\sum_i \left( \left( \frac{2-n}{2} \right)^2 + \frac{2-n}{2} \sum_t s_{it} + n + \frac{1}{2}\sum_{t \lt t'} s_{it}s_{it'} \right)
+$$
+$$
+= \frac{A}{2}\sum_i\sum_{t \lt t'} s_{it}s_{it'} + A \left( \frac{2-n}{2} \right) \sum_{it}s_{it}
+$$
+
+Similarly, we can get **constraint 2** as
+
+$$
+= \frac{A}{2}\sum_t\sum_{i \lt i'} s_{it}s_{i't} + A \left( \frac{2-n}{2} \right) \sum_{it}s_{it}
+$$
+
+Now we substitute s with Pauli Z gates and as a result, we get the **Ising Hamiltonian** as
+
+$$
+H = - \frac{1}{2}\sum_{i,j,t} d_{ij}Z_{it} + A \left(2-n \right)\sum_{it}Z_{it} + \frac{1}{4}\sum_{i,j,t}d_{ij}Z_{it}Z_{jt+1} + \frac{A}{2}\sum_i\sum_{t \lt t'} Z_{it}Z_{i't} + \frac{A}{2}\sum_t\sum_{i \lt i'} Z_{it}Z_{i't} 
+$$
