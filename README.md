@@ -1,4 +1,4 @@
-# Solving_TSP_with_QAOA
+# Solving TSP with QAOA
 This is a project about solving The Travelling Salesman Problem (TSP) with Quantum Approximate Optimization Algorithm (QAOA) using Qiskit library and Python.
 
 The **Documents folder** contains the following files:
