@@ -25,9 +25,11 @@ The **Documents folder** contains the following files:
    - Shows the sources used to make this project possible
   
 The **Code folder** contains the following files:
-1. TSP_qaoa.ipynb
-   - The code on solving TSP with QAOA
-2. TSP_qaoa_comparison.ipynb
+1. TSP_qaoa_timeslot.ipynb
+   - The code on solving timeslot encoded TSP with QAOA
+2. TSP_qaoa_timeslot_(reduced_variable).ipynb
+   - The code on solving timeslot encoded TSP with reduced variable with QAOA
+3. TSP_qaoa_comparison.ipynb
    - The code on comparing different parameters on this project
-3. requirements.txt
+4. requirements.txt
    - All the dependencies used for this project
